@@ -7,6 +7,7 @@ async function main() {
   const connection = await amqp.connect("amqp://localhost");
   const channel = await connection.createChannel();
 
+  // NOTE: in the consumer we don't need extra fancy config in order to run
 
   channel.consume(idiotQueue, async (msg) => {
     const content = msg.content.toString();

@@ -7,16 +7,23 @@ async function main() {
   const connection = await amqp.connect("amqp://localhost");
   const channel = await connection.createChannel();
 
-  await channel.assertExchange("chat", "fanout");
+  await channel.assertExchange("chat", "direct");
   await channel.assertQueue(idiotQueue, { durable: true });
-  await channel.bindQueue(idiotQueue, "chat");
+  // note how we used the pattern "blue" for the first queue
+  await channel.bindQueue(idiotQueue, "chat", "blue");
 
   // create another queue:
   await channel.assertQueue(idiotQueue2, { durable: true });
-  await channel.bindQueue(idiotQueue2, "chat");
+  // note how we used the pattern "yellow" for the second queue
+  await channel.bindQueue(idiotQueue2, "chat", "yellow");
 
-  for (let index = 0; index < 10; index++) {
-    channel.publish("chat", "", Buffer.from(new Date().toDateString()));
+  for (let index = 0; index < 5; index++) {
+    // note the second argument which explicity say how to send a message with a direct algo
+    channel.publish("chat", "blue", Buffer.from(`some blue msg ${index}`));
+  }
+  for (let index = 0; index < 2; index++) {
+    // note the second argument which explicity say how to send a message with a direct algo
+    channel.publish("chat", "yellow", Buffer.from("some Yellow msg"));
   }
 }
 
